@@ -3,7 +3,7 @@ const app = express();
 const morgan = require('morgan');
 const cors = require('cors');
 const path = require('path');
-const rsa = require('../rsa/rsa-cybersecurity');
+const rsa = require('../rsa2/rsa-cybersecurity');
 const bigconv = require('bigint-conversion');
 
 const ___dirname = path.resolve();
@@ -61,10 +61,13 @@ app.get('/key', (req, res) => {
 });
 
 app.post("/hola", (req, res) => {
-console.log(req.body.mensaje.c);
-  mensajeRecibido = bigconv.bigintToText(rsa.decrypt(bigconv.hexToBigint(req.body.mensaje.c), prKey.d, puKey.n));
-  respuesta = "Hola, gracias por tu mensaje. Te confirmo que he recibido el siguiente texto --> " + mensajeRecibido
-  respuestaEncriptada = bigconv.bigintToHex(rsa.encrypt(bigconv.textToBigint(respuesta), bigconv.hexToBigint(req.body.mensaje.e), bigconv.hexToBigint(req.body.mensaje.n)));
+
+  clientePublicKey = new rsa.PublicKey(bigconv.hexToBigint(req.body.mensaje.e),bigconv.hexToBigint(req.body.mensaje.n));
+  console.log("Mensaje encriptado :     "+req.body.mensaje.c);
+  mensajeRecibido = bigconv.bigintToText(prKey.decrypt(bigconv.hexToBigint(req.body.mensaje.c)));
+  respuesta = "Hola CLIENTE --> " + mensajeRecibido
+  console.log("Mensaje desencripado :  "+ mensajeRecibido);
+  respuestaEncriptada = bigconv.bigintToHex(clientePublicKey.encrypt(bigconv.textToBigint(respuesta)));
 
   const cosas = {
     respuestaServidor: respuestaEncriptada
